@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Healthy Living - Musc.AI</title>
+    <style>
+        /* Global Variables for Scaling and Theming */
+        :root {
+            --ui-scale: 1;
+            --base-font-size: 14px;
+            
+            /* Dark Theme (Default) */
+            --bg-main: #000000;
+            --bg-nav: #050505;
+            --bg-card: #0d0d0d;
+            --bg-input: #111111;
+            --bg-hover: #1a1a1a;
+            --bg-active: #222222;
+            
+            --bg-msg-user: #222222;
+            --bg-msg-ai: #0a0a0a;
+            
+            --border-main: #333333;
+            --border-light: #222222;
+            --border-focus: #888888;
+            
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --text-dim: #666666;
+            
+            --accent: #e57373;
+            --accent-hover: #c84b4b;
+            
+            --sys-msg-bg: #2b1d1e;
+            --sys-msg-text: #f8d7da;
+        }
+
+        body.light-mode {
+            /* Light Theme */
+            --bg-main: #f8f9fa;
+            --bg-nav: #f1f3f5;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --bg-hover: #e9ecef;
+            --bg-active: #dee2e6;
+            
+            --bg-msg-user: #e9ecef;
+            --bg-msg-ai: #ffffff;
+            
+            --border-main: #dee2e6;
+            --border-light: #e9ecef;
+            --border-focus: #adb5bd;
+            
+            --text-main: #212529;
+            --text-muted: #495057;
+            --text-dim: #868e96;
+            
+            --accent: #d32f2f;
+            --accent-hover: #b71c1c;
+            
+            --sys-msg-bg: #f8d7da;
+            --sys-msg-text: #721c24;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            font-size: calc(var(--base-font-size) * var(--ui-scale));
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* DASHBOARD (Left Side - 20%) */
+        .dashboard-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 20vw;
+            background-color: var(--bg-nav);
+            border-right: 1px solid var(--border-main);
+            display: flex;
+            flex-direction: column;
+            padding: calc(30px * var(--ui-scale)) calc(20px * var(--ui-scale));
+            box-sizing: border-box;
+            z-index: 10;
+            transform: translateX(-100%); 
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.3s, border-color 0.3s;
+        }
+
+        .dashboard-container.open {
+            transform: translateX(0);
+        }
+
+        /* Hanging Toggle Button */
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: calc(-45px * var(--ui-scale));
+            width: calc(45px * var(--ui-scale));
+            height: calc(40px * var(--ui-scale));
+            background-color: var(--bg-nav);
+            border: 1px solid var(--border-main);
+            border-left: none;
+            border-radius: 0 calc(8px * var(--ui-scale)) calc(8px * var(--ui-scale)) 0;
+            color: var(--text-main);
+            font-size: calc(20px * var(--ui-scale));
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 11;
+            transition: background-color 0.2s, border-color 0.3s, color 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background-color: var(--bg-hover);
+        }
+
+        /* Menu Layout */
+        .dashboard-menu {
+            display: flex;
+            flex-direction: column;
+            gap: calc(15px * var(--ui-scale));
+            width: 100%;
+        }
+
+        .dash-btn {
+            width: 100%;
+            padding: calc(15px * var(--ui-scale));
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            border: 1px solid var(--border-main);
+            border-radius: calc(6px * var(--ui-scale));
+            text-align: center;
+            text-decoration: none;
+            font-size: calc(var(--base-font-size) * var(--ui-scale));
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background-color 0.2s, border-color 0.2s, color 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dash-btn:hover {
+            background-color: var(--bg-active);
+            border-color: var(--border-focus);
+        }
+
+        /* Collapsible History Dropdown */
+        .history-list {
+            display: none;
+            flex-direction: column;
+            gap: calc(8px * var(--ui-scale));
+            margin-top: calc(5px * var(--ui-scale));
+            max-height: 35vh;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .history-list.open {
+            display: flex;
+        }
+
+        /* History Item */
+        .history-item {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-light);
+            padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+            border-radius: calc(4px * var(--ui-scale));
+            font-size: calc((var(--base-font-size) - 2px) * var(--ui-scale));
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-main);
+            border-color: var(--border-focus);
+        }
+
+        .history-item-title {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .trash-btn {
+            opacity: 0;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 2px 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, opacity 0.2s;
+            margin-left: calc(8px * var(--ui-scale));
+            flex-shrink: 0;
+        }
+
+        .history-item:hover .trash-btn {
+            opacity: 1;
+        }
+
+        .trash-btn:hover {
+            color: var(--accent);
+        }
+
+        .trash-btn svg {
+            width: calc(15px * var(--ui-scale));
+            height: calc(15px * var(--ui-scale));
+        }
+
+        .dashboard-spacer {
+            flex-grow: 1;
+        }
+
+        /* MAIN CONTAINER (Right Side - 80%) */
+        .main-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin-left: 0;
+            transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), margin-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+        }
+
+        .main-container.shifted {
+            margin-left: 20vw;
+            width: 80vw;
+        }
+
+        /* VIEW TOGGLING CLASSES */
+        .view-section {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+        }
+
+        .view-section.active {
+            display: flex;
+        }
+
+        /* CHAT VIEW */
+        .chat-display {
+            flex-grow: 1;
+            padding: calc(30px * var(--ui-scale));
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: calc(20px * var(--ui-scale));
+        }
+
+        .input-area {
+            padding: calc(30px * var(--ui-scale));
+            background-color: var(--bg-main);
+            transition: background-color 0.3s;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: calc(18px * var(--ui-scale));
+            border-radius: calc(8px * var(--ui-scale));
+            border: 1px solid var(--border-main);
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            font-size: calc((var(--base-font-size) + 2px) * var(--ui-scale));
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s, color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--border-focus);
+        }
+
+        .chat-input:disabled {
+            background-color: var(--bg-nav);
+            color: var(--text-dim);
+            border-color: var(--border-light);
+            cursor: not-allowed;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: calc(15px * var(--ui-scale)) calc(20px * var(--ui-scale));
+            border-radius: calc(8px * var(--ui-scale));
+            line-height: 1.6;
+            font-size: calc((var(--base-font-size) + 1px) * var(--ui-scale));
+        }
+        
+        .message.user {
+            background-color: var(--bg-msg-user);
+            align-self: flex-end;
+            border: 1px solid var(--border-light);
+        }
+        
+        .message.ai {
+            background-color: var(--bg-msg-ai);
+            border: 1px solid var(--border-light);
+            align-self: flex-start;
+        }
+
+        /* Typing Indicator Animation */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: calc(5px * var(--ui-scale));
+            padding: calc(5px * var(--ui-scale)) 0;
+            height: calc(14px * var(--ui-scale));
+        }
+
+        .typing-indicator span {
+            width: calc(6px * var(--ui-scale));
+            height: calc(6px * var(--ui-scale));
+            background-color: var(--text-muted);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(calc(-6px * var(--ui-scale))); }
+        }
+
+        /* Markdown & Table Styling */
+        .message.ai h2, .message.ai h3, .message.ai h4 {
+            margin-top: 10px;
+            margin-bottom: 6px;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        .message.ai ul, .message.ai ol {
+            margin: 6px 0;
+            padding-left: 20px;
+        }
+        .message.ai li {
+            margin-bottom: 4px;
+        }
+
+        .table-block-wrapper {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .routine-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: calc(6px * var(--ui-scale));
+            overflow: hidden;
+            color: var(--text-main);
+            font-size: calc((var(--base-font-size) - 1px) * var(--ui-scale));
+        }
+
+        .routine-table th, .routine-table td {
+            border: 1px solid var(--border-light);
+            padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .routine-table th {
+            background-color: var(--bg-hover);
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .routine-table tr:nth-child(even) {
+            background-color: var(--bg-nav);
+        }
+
+        /* Editable cell styles */
+        .routine-table td[contenteditable="true"] {
+            cursor: text;
+            transition: background-color 0.2s;
+        }
+        .routine-table td[contenteditable="true"]:hover {
+            background-color: var(--bg-hover);
+        }
+        .routine-table td[contenteditable="true"]:focus {
+            background-color: var(--bg-hover);
+            outline: 1px solid var(--accent);
+        }
+
+        .import-table-btn {
+            align-self: flex-start;
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            border: 1px solid var(--border-main);
+            padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
+            border-radius: calc(4px * var(--ui-scale));
+            font-size: calc((var(--base-font-size) - 2px) * var(--ui-scale));
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .import-table-btn:hover {
+            background-color: var(--bg-active);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* System Messages */
+        .message.system {
+            background-color: var(--sys-msg-bg);
+            border: 1px solid var(--accent);
+            align-self: flex-start;
+            color: var(--sys-msg-text);
+        }
+
+        /* PLANNER VIEW */
+        #planner-view {
+            padding: calc(40px * var(--ui-scale));
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .planner-svg {
+            width: calc(100px * var(--ui-scale));
+            height: calc(100px * var(--ui-scale));
+            margin-bottom: calc(20px * var(--ui-scale));
+            opacity: 0.8;
+        }
+
+        .planner-title {
+            font-size: calc((var(--base-font-size) + 10px) * var(--ui-scale));
+            font-weight: 600;
+            margin-bottom: calc(15px * var(--ui-scale));
+        }
+
+        .planner-desc {
+            color: var(--text-muted);
+            font-size: calc(var(--base-font-size) * var(--ui-scale));
+            max-width: 500px;
+            margin-bottom: calc(25px * var(--ui-scale));
+            line-height: 1.5;
+        }
+
+        .profile-badge {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-main);
+            padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
+            border-radius: calc(20px * var(--ui-scale));
+            font-size: calc((var(--base-font-size) - 1px) * var(--ui-scale));
+            color: var(--text-dim);
+            margin-bottom: calc(20px * var(--ui-scale));
+            display: inline-block;
+        }
+
+        .planner-section-title {
+            font-size: calc((var(--base-font-size) + 4px) * var(--ui-scale));
+            font-weight: 600;
+            margin: calc(30px * var(--ui-scale)) 0 calc(15px * var(--ui-scale)) 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-main);
+            width: 100%;
+        }
+
+        /* Planner Grid Layout (Columns) */
+        .planner-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: calc(20px * var(--ui-scale));
+            width: 100%;
+            margin-top: calc(20px * var(--ui-scale));
+            min-height: 100px; 
+        }
+
+        .planner-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: calc(8px * var(--ui-scale));
+            padding: calc(15px * var(--ui-scale));
+            display: flex;
+            flex-direction: column;
+            gap: calc(12px * var(--ui-scale));
+            box-sizing: border-box;
+            transition: border-color 0.2s, opacity 0.2s, box-shadow 0.2s, background-color 0.3s;
+        }
+        
+        /* Drag & Drop Visuals */
+        .planner-card.drag-over {
+            border: 2px dashed var(--accent);
+            background-color: var(--bg-hover);
+            box-shadow: 0 0 10px rgba(229, 115, 115, 0.2);
+        }
+
+        .planner-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: calc(10px * var(--ui-scale));
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: var(--text-dim);
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        .drag-handle:hover {
+            color: var(--text-main);
+        }
+
+        .planner-card-title {
+            font-weight: 600;
+            font-size: calc((var(--base-font-size) + 1px) * var(--ui-scale));
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-main);
+            padding: 4px 6px;
+            border-radius: 4px;
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .planner-card-title:hover {
+            border-color: var(--border-main);
+            background-color: var(--bg-input);
+        }
+
+        .planner-card-title:focus {
+            border-color: var(--accent);
+            background-color: var(--bg-input);
+            outline: none;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .card-icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s, background-color 0.2s;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-icon-btn:hover {
+            background-color: var(--bg-active);
+            color: var(--text-main);
+        }
+        .card-icon-btn.delete-btn:hover {
+            color: var(--accent);
+        }
+
+        .action-btn {
+            background-color: var(--bg-active);
+            color: var(--text-main);
+            border: 1px solid var(--border-focus);
+            padding: calc(12px * var(--ui-scale)) calc(25px * var(--ui-scale));
+            border-radius: calc(30px * var(--ui-scale));
+            font-size: calc((var(--base-font-size) + 1px) * var(--ui-scale));
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            background-color: var(--border-focus);
+            color: #fff;
+        }
+        
+        #archived-section {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            margin-top: calc(30px * var(--ui-scale));
+        }
+
+        /* SETTINGS VIEW */
+        #settings-view {
+            padding: calc(40px * var(--ui-scale));
+            box-sizing: border-box;
+            align-items: flex-start;
+        }
+
+        .settings-title {
+            font-size: calc((var(--base-font-size) + 14px) * var(--ui-scale));
+            font-weight: 600;
+            margin-bottom: calc(30px * var(--ui-scale));
+            border-bottom: 1px solid var(--border-main);
+            padding-bottom: calc(15px * var(--ui-scale));
+            width: 100%;
+        }
+
+        .settings-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: calc(8px * var(--ui-scale));
+            padding: calc(20px * var(--ui-scale));
+            margin-bottom: calc(25px * var(--ui-scale));
+            width: 100%;
+            max-width: 650px;
+            box-sizing: border-box;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .settings-card-title {
+            font-size: calc((var(--base-font-size) + 4px) * var(--ui-scale));
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: calc(6px * var(--ui-scale));
+        }
+
+        .settings-card-subtitle {
+            font-size: calc((var(--base-font-size) - 1px) * var(--ui-scale));
+            color: var(--text-dim);
+            margin-bottom: calc(20px * var(--ui-scale));
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: calc(15px * var(--ui-scale));
+        }
+
+        .settings-group {
+            display: flex;
+            flex-direction: column;
+            gap: calc(8px * var(--ui-scale));
+            margin-bottom: calc(15px * var(--ui-scale));
+            width: 100%;
+        }
+
+        .settings-label {
+            font-size: calc(var(--base-font-size) * var(--ui-scale));
+            color: var(--text-muted);
+        }
+
+        .settings-label.required::after {
+            content: ' *';
+            color: var(--accent);
+        }
+
+        .settings-input {
+            width: 100%;
+            padding: calc(12px * var(--ui-scale));
+            border-radius: calc(6px * var(--ui-scale));
+            border: 1px solid var(--border-main);
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            font-size: calc(var(--base-font-size) * var(--ui-scale));
+            outline: none;
+            box-sizing: border-box;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+            font-family: inherit;
+        }
+        
+        .settings-input:focus {
+            border-color: var(--border-focus);
+        }
+
+        textarea.settings-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .save-notice {
+            color: #4CAF50;
+            margin-left: calc(15px * var(--ui-scale));
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: calc(var(--base-font-size) * var(--ui-scale));
+        }
+
+        /* DELETE CONFIRMATION MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-main);
+            border-radius: calc(8px * var(--ui-scale));
+            padding: calc(25px * var(--ui-scale));
+            max-width: 400px;
+            width: 85%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+        }
+
+        .modal-title {
+            font-size: calc((var(--base-font-size) + 4px) * var(--ui-scale));
+            font-weight: 600;
+            margin-bottom: calc(10px * var(--ui-scale));
+            color: var(--text-main);
+        }
+
+        .modal-text {
+            font-size: calc(var(--base-font-size) * var(--ui-scale));
+            color: var(--text-muted);
+            margin-bottom: calc(25px * var(--ui-scale));
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: calc(12px * var(--ui-scale));
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: calc(10px * var(--ui-scale)) calc(20px * var(--ui-scale));
+            border-radius: calc(6px * var(--ui-scale));
+            font-size: calc(var(--base-font-size) * var(--ui-scale));
+            cursor: pointer;
+            border: 1px solid var(--border-main);
+            transition: background-color 0.2s, border-color 0.2s;
+            font-weight: 500;
+        }
+
+        .modal-btn.cancel {
+            background-color: var(--bg-active);
+            color: var(--text-main);
+        }
+
+        .modal-btn.cancel:hover {
+            background-color: var(--border-main);
+        }
+
+        .modal-btn.confirm {
+            background-color: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        .modal-btn.confirm:hover {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dashboard -->
+    <div class="dashboard-container" id="dashboard">
+        <div class="toggle-btn" id="toggle-btn">☰</div>
+
+        <div class="dashboard-menu">
+            <button class="dash-btn" id="new-chat-btn" style="justify-content: center;">New Chat</button>
+            
+            <button class="dash-btn" id="history-toggle-btn">
+                <span>Chat History</span>
+                <span id="dropdown-arrow" style="font-size: 10px; opacity: 0.7;">▼</span>
+            </button>
+            
+            <div class="history-list" id="history-list"></div>
+            
+            <button class="dash-btn" id="planner-btn" style="justify-content: center;">Planner</button>
+        </div>
+        
+        <div class="dashboard-spacer"></div>
+        
+        <button class="dash-btn" id="settings-btn" style="justify-content: center;">Settings</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-container" id="main-wrapper">
+        
+        <!-- View 1: Chat Interface -->
+        <div class="view-section active" id="chat-view">
+            <div class="chat-display" id="chat-display"></div>
+            <div class="input-area">
+                <input type="text" class="chat-input" id="chat-input">
+            </div>
+        </div>
+
+        <!-- View 2: Planner Interface -->
+        <div class="view-section" id="planner-view">
+            
+            <!-- Locked View State -->
+            <div id="planner-locked-view" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center;">
+                <svg class="planner-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <div class="planner-title">Planner Locked</div>
+                <div class="planner-desc">Please complete your necessary profile info under <strong>"Get Started on Musc.AI"</strong> in Settings (Height, Age, and Weight are required) to unlock your custom AI routine planner. Any unimported or pending tables are discarded while locked.</div>
+                <button class="action-btn" id="go-to-settings-btn">Go to Settings</button>
+            </div>
+
+            <!-- Unlocked View State -->
+            <div id="planner-unlocked-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <div class="planner-title">Musc.AI Custom Planner Dashboard</div>
+                <div class="profile-badge" id="planner-profile-badge">Height: -- | Age: -- | Weight: --</div>
+                
+                <button class="action-btn" id="generate-routine-btn">Generate AI Schedule Table</button>
+                
+                <div class="planner-section-title" style="margin-top: 40px;">Active Plans</div>
+                <div class="planner-grid" id="planner-grid-container">
+                    <!-- Rendered Active planner tables go here -->
+                </div>
+
+                <div id="archived-section">
+                    <div class="planner-section-title" style="color: var(--text-dim);">Archived Plans</div>
+                    <div class="planner-grid" id="archived-grid-container" style="opacity: 0.7;">
+                        <!-- Rendered Archived planner tables go here -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- View 3: Settings Interface -->
+        <div class="view-section" id="settings-view">
+            <div class="settings-title">Application Settings</div>
+            
+            <!-- Section 1: API Key & Persona -->
+            <div class="settings-card">
+                <div class="settings-card-title">AI Configuration</div>
+                <div class="settings-card-subtitle">Connect to Gemini and customize how your AI acts.</div>
+                <div class="settings-group">
+                    <label class="settings-label required" for="api-key-input">Gemini API Key:</label>
+                    <input type="password" id="api-key-input" class="settings-input" placeholder="AIzaSy...">
+                    <small style="color: var(--text-dim); margin-top: 2px;">Stored securely in browser local storage.</small>
+                </div>
+                <div class="settings-group" style="margin-top: 10px;">
+                    <label class="settings-label" for="ai-personality-input">AI Personality Customizer (Optional Prompt Context):</label>
+                    <textarea id="ai-personality-input" class="settings-input" placeholder="e.g. Act like a tough military drill sergeant, be very supportive, or use medical terminology..."></textarea>
+                    <small style="color: var(--text-dim); margin-top: 2px;">Feeds extra context into the AI to alter its conversational tone and behavior.</small>
+                </div>
+            </div>
+
+            <!-- Section 2: Get Started on Musc.AI -->
+            <div class="settings-card">
+                <div class="settings-card-title">Get Started on Musc.AI</div>
+                <div class="settings-card-subtitle">Provide your health details. Height, Age, and Weight are required to unlock the Planner.</div>
+                
+                <div class="grid-2col">
+                    <div class="settings-group">
+                        <label class="settings-label required" for="user-height">Height (cm/in):</label>
+                        <input type="text" id="user-height" class="settings-input" placeholder="e.g. 175 cm">
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label required" for="user-age">Age:</label>
+                        <input type="number" id="user-age" class="settings-input" placeholder="e.g. 25">
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label required" for="user-weight">Weight (kg/lbs):</label>
+                        <input type="text" id="user-weight" class="settings-input" placeholder="e.g. 70 kg">
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label" for="user-conditions">Special Conditions (Optional):</label>
+                        <input type="text" id="user-conditions" class="settings-input" placeholder="Injuries, asthma, allergies, etc.">
+                    </div>
+
+                    <!-- NEW: Other Schedule Context -->
+                    <div class="settings-group" style="grid-column: 1 / -1; margin-top: 10px;">
+                        <label class="settings-label" for="user-schedule-type">Other Daily Commitments (Optional):</label>
+                        <input type="text" id="user-schedule-type" class="settings-input" placeholder="e.g. School, Office Work, Night Shift">
+                        <small style="color: var(--text-dim); margin-top: 2px;">Helps the AI schedule your workouts and meals around your real life.</small>
+                    </div>
+                    
+                    <!-- Hidden Time Dropdown Menu for Extra Context -->
+                    <div class="grid-2col" id="schedule-details-container" style="display: none; grid-column: 1 / -1; padding: 15px; background-color: var(--bg-nav); border-radius: 8px; border-left: 3px solid var(--accent);">
+                        <div class="settings-group" style="margin-bottom: 0;">
+                            <label class="settings-label" for="user-schedule-start">Start Time:</label>
+                            <input type="time" id="user-schedule-start" class="settings-input">
+                        </div>
+                        <div class="settings-group" style="margin-bottom: 0;">
+                            <label class="settings-label" for="user-schedule-end">End Time:</label>
+                            <input type="time" id="user-schedule-end" class="settings-input">
+                        </div>
+                        <div class="settings-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+                            <label class="settings-label" for="user-timezone">Time Zone:</label>
+                            <input type="text" id="user-timezone" class="settings-input" placeholder="e.g. UTC-5, EST, Asia/Jakarta">
+                            <small style="color: var(--text-dim); margin-top: 4px;">Helps the AI calculate timings properly according to your region.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: UI Options -->
+            <div class="settings-card">
+                <div class="settings-card-title">Appearance & Preferences</div>
+                <div class="grid-2col">
+                    <div class="settings-group">
+                        <label class="settings-label" for="ui-theme-select">Theme Mode:</label>
+                        <select id="ui-theme-select" class="settings-input">
+                            <option value="dark">Dark Mode</option>
+                            <option value="light">Light Mode</option>
+                        </select>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label" for="ui-scale-input">UI Scale Size (Layout):</label>
+                        <input type="range" id="ui-scale-input" min="0.8" max="1.5" step="0.1" value="1">
+                    </div>
+                    <div class="settings-group" style="grid-column: 1 / -1;">
+                        <label class="settings-label" for="font-size-input">Base Font Size (Text):</label>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <input type="range" id="font-size-input" min="12" max="24" step="1" value="14" style="flex-grow: 1;">
+                            <span id="font-size-display" style="min-width: 40px; text-align: right; color: var(--text-main);">14px</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-top: 10px; margin-bottom: 50px;">
+                <button class="action-btn" id="save-settings-btn">Save Settings</button>
+                <span class="save-notice" id="save-notice">Settings saved successfully!</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal-content">
+            <div class="modal-title">Delete Chat Session?</div>
+            <div class="modal-text">Are you sure you want to delete this chat history? This action cannot be undone.</div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancel-delete-btn">Cancel</button>
+                <button class="modal-btn confirm" id="confirm-delete-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 0. State Variables & Initialization ---
+        let GEMINI_API_KEY = localStorage.getItem('ai_health_gemini_key') || '';
+        let aiPersonality = localStorage.getItem('ai_health_personality') || '';
+        
+        let currentScale = localStorage.getItem('ai_health_ui_scale') || '1';
+        let currentFontSize = localStorage.getItem('ai_health_font_size') || '14';
+        let currentTheme = localStorage.getItem('ai_health_theme') || 'dark';
+        
+        let userHeight = localStorage.getItem('ai_health_height') || '';
+        let userAge = localStorage.getItem('ai_health_age') || '';
+        let userWeight = localStorage.getItem('ai_health_weight') || '';
+        let userConditions = localStorage.getItem('ai_health_conditions') || '';
+        
+        // New Schedule State Variables
+        let userScheduleType = localStorage.getItem('ai_health_schedule_type') || '';
+        let userScheduleStart = localStorage.getItem('ai_health_schedule_start') || '';
+        let userScheduleEnd = localStorage.getItem('ai_health_schedule_end') || '';
+        let userTimezone = localStorage.getItem('ai_health_timezone') || '';
+
+        // Planner Tables array structure: [{ id, title, tableHtml, archived }]
+        let plannerTables = JSON.parse(localStorage.getItem('ai_health_planner_tables')) || [];
+
+        // Apply visual settings on load
+        document.documentElement.style.setProperty('--ui-scale', currentScale);
+        document.documentElement.style.setProperty('--base-font-size', currentFontSize + 'px');
+        
+        if (currentTheme === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        // Hydrate DOM inputs
+        document.getElementById('ui-scale-input').value = currentScale;
+        document.getElementById('font-size-input').value = currentFontSize;
+        document.getElementById('font-size-display').textContent = currentFontSize + 'px';
+        document.getElementById('ui-theme-select').value = currentTheme;
+        
+        if (GEMINI_API_KEY) document.getElementById('api-key-input').value = GEMINI_API_KEY;
+        if (aiPersonality) document.getElementById('ai-personality-input').value = aiPersonality;
+        if (userHeight) document.getElementById('user-height').value = userHeight;
+        if (userAge) document.getElementById('user-age').value = userAge;
+        if (userWeight) document.getElementById('user-weight').value = userWeight;
+        if (userConditions) document.getElementById('user-conditions').value = userConditions;
+        
+        // Hydrate new schedule inputs
+        const scheduleTypeInput = document.getElementById('user-schedule-type');
+        const scheduleContainer = document.getElementById('schedule-details-container');
+        const tzInput = document.getElementById('user-timezone');
+
+        if (userScheduleType) scheduleTypeInput.value = userScheduleType;
+        if (userScheduleStart) document.getElementById('user-schedule-start').value = userScheduleStart;
+        if (userScheduleEnd) document.getElementById('user-schedule-end').value = userScheduleEnd;
+        
+        // Auto-detect timezone if not set, otherwise load from storage
+        if (userTimezone) {
+            tzInput.value = userTimezone;
+        } else {
+            try {
+                tzInput.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            } catch(e) { /* ignore if browser doesn't support it */ }
+        }
+
+        // Toggle Schedule expansion logic
+        function handleScheduleVisibility() {
+            if (scheduleTypeInput.value.trim() !== '') {
+                scheduleContainer.style.display = 'grid';
+            } else {
+                scheduleContainer.style.display = 'none';
+            }
+        }
+        scheduleTypeInput.addEventListener('input', handleScheduleVisibility);
+        handleScheduleVisibility(); // Run on init
+
+        // Dynamic Font Size text updater
+        document.getElementById('font-size-input').addEventListener('input', (e) => {
+            document.getElementById('font-size-display').textContent = e.target.value + 'px';
+        });
+
+        const chatInput = document.getElementById('chat-input');
+        const chatDisplay = document.getElementById('chat-display');
+
+        // Note: Schedule is an optional context, so it doesn't block completion
+        function isProfileComplete() {
+            return userHeight && userAge && userWeight;
+        }
+
+        function updateInputState() {
+            if (!GEMINI_API_KEY) {
+                chatInput.disabled = true;
+                chatInput.value = '';
+                chatInput.placeholder = "Please enter Gemini API key in Settings";
+            } else {
+                chatInput.disabled = false;
+                chatInput.placeholder = "Type your prompt here and press Enter...";
+            }
+        }
+
+        function invalidateApiKey(errorMessage) {
+            GEMINI_API_KEY = '';
+            localStorage.removeItem('ai_health_gemini_key');
+            document.getElementById('api-key-input').value = '';
+            updateInputState();
+            appendMessage(`⚠️ API Key Error: ${errorMessage || "Invalid Key"}. Key removed. Please configure a valid API Key in Settings.`, "system");
+        }
+
+        // --- Typing Indicator Functions ---
+        let typingIndicatorDiv = null;
+
+        function showTypingIndicator() {
+            typingIndicatorDiv = document.createElement('div');
+            typingIndicatorDiv.classList.add('message', 'ai');
+            typingIndicatorDiv.innerHTML = `
+                <div class="typing-indicator">
+                    <span></span><span></span><span></span>
+                </div>
+            `;
+            chatDisplay.appendChild(typingIndicatorDiv);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            if (typingIndicatorDiv && typingIndicatorDiv.parentNode) {
+                typingIndicatorDiv.parentNode.removeChild(typingIndicatorDiv);
+                typingIndicatorDiv = null;
+            }
+        }
+
+        // --- Markdown & Table Parser ---
+        function parseMarkdown(text) {
+            if (!text) return '';
+            let formattedText = convertMarkdownTables(text);
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            return formattedText;
+        }
+
+        function convertMarkdownTables(text) {
+            if (!text.includes('|')) return text;
+            const lines = text.split('\n');
+            let inTable = false;
+            let tableLines = [];
+            let result = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                const isTableLine = line.includes('|') && (line.startsWith('|') || line.endsWith('|') || line.split('|').length > 2);
+
+                if (isTableLine) {
+                    inTable = true;
+                    tableLines.push(line);
+                } else {
+                    if (inTable) {
+                        result.push(renderHtmlTableBlock(tableLines));
+                        tableLines = [];
+                        inTable = false;
+                    }
+                    result.push(line);
+                }
+            }
+            if (inTable) result.push(renderHtmlTableBlock(tableLines));
+            return result.join('\n');
+        }
+
+        function renderHtmlTableBlock(lines) {
+            let headers = [];
+            let rows = [];
+
+            lines.forEach((line) => {
+                if (line.replace(/[\s\-\|]/g, '') === '') return;
+                const cells = line.split('|').map(c => c.trim()).filter((c, idx, arr) => !(idx === 0 && c === '') && !(idx === arr.length - 1 && c === ''));
+                if (headers.length === 0) headers = cells;
+                else rows.push(cells);
+            });
+
+            if (headers.length === 0) return '';
+            const tableId = 'table_' + Math.random().toString(36).substr(2, 9);
+
+            let html = `<div class="table-block-wrapper" id="${tableId}">`;
+            html += `<table class="routine-table"><thead><tr>`;
+            headers.forEach(h => html += `<th>${h}</th>`);
+            html += `</tr></thead><tbody>`;
+            rows.forEach(r => {
+                html += `<tr>`;
+                r.forEach(c => html += `<td>${c}</td>`);
+                html += `</tr>`;
+            });
+            html += `</tbody></table>`;
+            html += `<button class="import-table-btn" onclick="importTableToPlanner('${tableId}')">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                        Import to Planner
+                     </button></div>`;
+            return html;
+        }
+
+        function injectContentEditable(htmlString) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlString;
+            tempDiv.querySelectorAll('td').forEach(td => td.setAttribute('contenteditable', 'true'));
+            return tempDiv.innerHTML;
+        }
+
+        window.importTableToPlanner = function(tableWrapperId) {
+            if (!isProfileComplete()) {
+                alert("Planner is currently locked! Please complete your required health profile details (Height, Age, Weight) in Settings first.");
+                return;
+            }
+
+            const wrapper = document.getElementById(tableWrapperId);
+            if (!wrapper) return;
+
+            let rawTableHtml = wrapper.querySelector('table').outerHTML;
+            let editableTableHtml = injectContentEditable(rawTableHtml);
+            const tableName = prompt("Name your new planner table:", "Imported Schedule") || "Imported Schedule";
+
+            plannerTables.push({
+                id: 'planner_tbl_' + Date.now(),
+                title: tableName,
+                tableHtml: editableTableHtml,
+                archived: false
+            });
+            savePlannerTables();
+            renderPlannerGrid();
+            alert(`"${tableName}" has been successfully imported to your Planner! Click on any cell in the table to edit it.`);
+        };
+
+        updateInputState();
+        updatePlannerState();
+
+        // --- 1. Dashboard & View Switching ---
+        const dashboard = document.getElementById('dashboard');
+        const mainWrapper = document.getElementById('main-wrapper');
+        const toggleBtn = document.getElementById('toggle-btn');
+        
+        const views = {
+            chat: document.getElementById('chat-view'),
+            planner: document.getElementById('planner-view'),
+            settings: document.getElementById('settings-view')
+        };
+
+        const buttons = {
+            chat: document.getElementById('new-chat-btn'),
+            planner: document.getElementById('planner-btn'),
+            settings: document.getElementById('settings-btn')
+        };
+
+        toggleBtn.addEventListener('click', () => {
+            dashboard.classList.toggle('open');
+            mainWrapper.classList.toggle('shifted');
+        });
+
+        function switchView(viewName) {
+            Object.values(views).forEach(view => view.classList.remove('active'));
+            views[viewName].classList.add('active');
+            if (viewName === 'planner') updatePlannerState();
+        }
+
+        buttons.planner.addEventListener('click', () => switchView('planner'));
+        buttons.settings.addEventListener('click', () => switchView('settings'));
+        document.getElementById('go-to-settings-btn').addEventListener('click', () => switchView('settings'));
+
+        // --- 2. Chat History Dropdown Toggle ---
+        const historyToggleBtn = document.getElementById('history-toggle-btn');
+        const historyList = document.getElementById('history-list');
+        const dropdownArrow = document.getElementById('dropdown-arrow');
+
+        historyToggleBtn.addEventListener('click', () => {
+            historyList.classList.toggle('open');
+            dropdownArrow.textContent = historyList.classList.contains('open') ? '▲' : '▼';
+        });
+
+        // --- 3. Settings Management ---
+        document.getElementById('save-settings-btn').addEventListener('click', () => {
+            // API & Persona
+            GEMINI_API_KEY = document.getElementById('api-key-input').value.trim();
+            aiPersonality = document.getElementById('ai-personality-input').value.trim();
+            
+            if (GEMINI_API_KEY) localStorage.setItem('ai_health_gemini_key', GEMINI_API_KEY);
+            else localStorage.removeItem('ai_health_gemini_key');
+            
+            localStorage.setItem('ai_health_personality', aiPersonality);
+
+            // Profile Info
+            userHeight = document.getElementById('user-height').value.trim();
+            userAge = document.getElementById('user-age').value.trim();
+            userWeight = document.getElementById('user-weight').value.trim();
+            userConditions = document.getElementById('user-conditions').value.trim();
+            
+            // Schedule Info
+            userScheduleType = document.getElementById('user-schedule-type').value.trim();
+            userScheduleStart = document.getElementById('user-schedule-start').value;
+            userScheduleEnd = document.getElementById('user-schedule-end').value;
+            userTimezone = document.getElementById('user-timezone').value.trim();
+
+            localStorage.setItem('ai_health_height', userHeight);
+            localStorage.setItem('ai_health_age', userAge);
+            localStorage.setItem('ai_health_weight', userWeight);
+            localStorage.setItem('ai_health_conditions', userConditions);
+            
+            localStorage.setItem('ai_health_schedule_type', userScheduleType);
+            localStorage.setItem('ai_health_schedule_start', userScheduleStart);
+            localStorage.setItem('ai_health_schedule_end', userScheduleEnd);
+            localStorage.setItem('ai_health_timezone', userTimezone);
+
+            // UI Preferences
+            const newScale = document.getElementById('ui-scale-input').value;
+            const newFontSize = document.getElementById('font-size-input').value;
+            const newTheme = document.getElementById('ui-theme-select').value;
+            
+            document.documentElement.style.setProperty('--ui-scale', newScale);
+            document.documentElement.style.setProperty('--base-font-size', newFontSize + 'px');
+            localStorage.setItem('ai_health_ui_scale', newScale);
+            localStorage.setItem('ai_health_font_size', newFontSize);
+
+            if (newTheme === 'light') {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+            localStorage.setItem('ai_health_theme', newTheme);
+
+            updateInputState();
+            updatePlannerState();
+
+            const notice = document.getElementById('save-notice');
+            notice.style.opacity = '1';
+            setTimeout(() => { notice.style.opacity = '0'; }, 3000);
+        });
+
+        // --- 4. Planner Locking & Core Features ---
+        function updatePlannerState() {
+            const lockedView = document.getElementById('planner-locked-view');
+            const unlockedView = document.getElementById('planner-unlocked-view');
+            const badge = document.getElementById('planner-profile-badge');
+
+            if (!isProfileComplete()) {
+                lockedView.style.display = 'flex';
+                unlockedView.style.display = 'none';
+                plannerTables = [];
+                localStorage.removeItem('ai_health_planner_tables');
+            } else {
+                lockedView.style.display = 'none';
+                unlockedView.style.display = 'flex';
+                let conditionText = userConditions ? ` | Conditions: ${userConditions}` : ' | Conditions: None';
+                let schedText = userScheduleType ? ` | Daily Commitment: ${userScheduleType}` : '';
+                badge.textContent = `Height: ${userHeight} | Age: ${userAge} | Weight: ${userWeight}${conditionText}${schedText}`;
+                renderPlannerGrid();
+            }
+        }
+
+        function savePlannerTables() {
+            localStorage.setItem('ai_health_planner_tables', JSON.stringify(plannerTables));
+        }
+
+        function renderPlannerGrid() {
+            const activeGrid = document.getElementById('planner-grid-container');
+            const archivedGrid = document.getElementById('archived-grid-container');
+            const archivedSection = document.getElementById('archived-section');
+            
+            activeGrid.innerHTML = '';
+            archivedGrid.innerHTML = '';
+
+            let hasArchived = false;
+            let hasActive = false;
+
+            plannerTables.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.classList.add('planner-card');
+                card.setAttribute('draggable', 'true');
+                card.dataset.index = index;
+
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragover', handleDragOver);
+                card.addEventListener('dragleave', handleDragLeave);
+                card.addEventListener('drop', handleDrop);
+                card.addEventListener('dragend', handleDragEnd);
+
+                const archiveIcon = item.archived ? 
+                    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>` : 
+                    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>`;
+                
+                card.innerHTML = `
+                    <div class="planner-card-header">
+                        <div class="drag-handle" title="Drag to move"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></div>
+                        <input type="text" class="planner-card-title" value="${item.title}" onchange="updateTableName(${index}, this.value)">
+                        <div class="card-actions">
+                            <button class="card-icon-btn" onclick="toggleArchiveTable(${index})">${archiveIcon}</button>
+                            <button class="card-icon-btn delete-btn" onclick="deletePlannerTable(${index})">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;" oninput="updateTableContent(${index}, this)">${item.tableHtml}</div>
+                `;
+
+                if (item.archived) {
+                    archivedGrid.appendChild(card);
+                    hasArchived = true;
+                } else {
+                    activeGrid.appendChild(card);
+                    hasActive = true;
+                }
+            });
+
+            if (!hasActive) {
+                activeGrid.innerHTML = `<div style="grid-column: 1 / -1; color: var(--text-dim); text-align: center; padding: 40px; border: 1px dashed var(--border-focus); border-radius: 8px;">No active tables. Import tables from your AI chats or click "Generate AI Schedule Table" above!</div>`;
+            }
+
+            archivedSection.style.display = hasArchived ? 'flex' : 'none';
+        }
+
+        let draggedIndex = null;
+        function handleDragStart(e) {
+            draggedIndex = parseInt(this.dataset.index);
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', draggedIndex);
+            setTimeout(() => this.style.opacity = '0.4', 0);
+        }
+        function handleDragOver(e) {
+            e.preventDefault(); 
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+            return false;
+        }
+        function handleDragLeave(e) { this.classList.remove('drag-over'); }
+        function handleDrop(e) {
+            e.preventDefault(); e.stopPropagation();
+            this.classList.remove('drag-over');
+            const targetIndex = parseInt(this.dataset.index);
+            if (draggedIndex === null || draggedIndex === targetIndex || isNaN(targetIndex)) return false;
+            
+            const draggedItem = plannerTables.splice(draggedIndex, 1)[0];
+            plannerTables.splice(targetIndex, 0, draggedItem);
+            savePlannerTables();
+            renderPlannerGrid();
+            return false;
+        }
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            document.querySelectorAll('.planner-card').forEach(card => card.classList.remove('drag-over'));
+            draggedIndex = null;
+        }
+
+        window.updateTableName = function(index, newTitle) {
+            plannerTables[index].title = newTitle.trim() || 'Untitled Table';
+            savePlannerTables();
+        };
+        window.updateTableContent = function(index, element) {
+            plannerTables[index].tableHtml = element.innerHTML;
+            savePlannerTables();
+        };
+        window.toggleArchiveTable = function(index) {
+            plannerTables[index].archived = !plannerTables[index].archived;
+            savePlannerTables();
+            renderPlannerGrid();
+        };
+        window.deletePlannerTable = function(index) {
+            if (confirm("Are you sure you want to completely delete this table?")) {
+                plannerTables.splice(index, 1);
+                savePlannerTables();
+                renderPlannerGrid();
+            }
+        };
+
+        // --- Routine Generation via Planner AI Call ---
+        document.getElementById('generate-routine-btn').addEventListener('click', async () => {
+            if (!GEMINI_API_KEY) {
+                alert("Please enter a valid Gemini API key in Settings.");
+                return;
+            }
+            const tableName = prompt("Give a title for this new AI Table:", "Weekly Fitness & Nutrition Plan") || "Weekly Fitness & Nutrition Plan";
+
+            try {
+                let promptText = `Construct a complete workout and nutrition routine schedule table based on my details:
+                - Height: ${userHeight}
+                - Age: ${userAge}
+                - Weight: ${userWeight}`;
+                if (userConditions) promptText += `\n- Special Conditions: ${userConditions}`;
+                
+                if (userScheduleType) {
+                    let schedTxt = `\n- Daily Commitment: ${userScheduleType}`;
+                    if (userScheduleStart && userScheduleEnd) schedTxt += ` from ${userScheduleStart} to ${userScheduleEnd}`;
+                    if (userTimezone) schedTxt += ` (${userTimezone})`;
+                    promptText += schedTxt;
+                    promptText += `\nUser wants to make a daily healthy schedule for them, but they want to chat before you do.`;
+                }
+                
+                if (aiPersonality) promptText += `\n\nAI Persona Instructions: ${aiPersonality}`;
+
+                promptText += `\n\nFormat your response STRICTLY as a Markdown Table with columns for Day/Time, Target/Focus, Exercises & Sets, and Nutrition Tips.`;
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`;
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ role: 'user', parts: [{ text: promptText }] }]
+                    })
+                });
+
+                const data = await response.json();
+                if (data.candidates && data.candidates.length > 0) {
+                    const aiText = data.candidates[0].content.parts[0].text;
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = parseMarkdown(aiText);
+                    const tableElem = tempDiv.querySelector('table');
+
+                    if (tableElem) {
+                        let editableHtml = injectContentEditable(tableElem.outerHTML);
+                        plannerTables.unshift({ id: 'planner_tbl_' + Date.now(), title: tableName, tableHtml: editableHtml, archived: false });
+                        savePlannerTables();
+                        renderPlannerGrid();
+                    } else {
+                        alert("AI response did not contain a valid table structure. Please try again.");
+                    }
+                } else if (data.error) {
+                    const errLower = (data.error.message || '').toLowerCase();
+                    if (data.error.code === 400 || data.error.code === 401 || data.error.code === 403 || errLower.includes('key')) invalidateApiKey(data.error.message);
+                    else alert(`API Error: ${data.error.message}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Failed to generate plan. Please try again.");
+            }
+        });
+
+        // --- 5. Chat & History State ---
+        let chatSessions = JSON.parse(localStorage.getItem('ai_health_sessions')) || [];
+        let currentSessionId = null;
+        let currentMessages = [];
+
+        renderHistoryList();
+
+        buttons.chat.addEventListener('click', () => {
+            switchView('chat');
+            saveCurrentSession();
+            currentSessionId = 'session_' + Date.now();
+            currentMessages = [];
+            chatDisplay.innerHTML = ''; 
+        });
+
+        function saveCurrentSession() {
+            if (currentMessages.length > 0 && currentSessionId) {
+                const firstUserMsg = currentMessages.find(m => m.sender === 'user');
+                let title = firstUserMsg ? firstUserMsg.text.trim() : "New Conversation";
+                if (title.length > 30) title = title.substring(0, 27) + "...";
+
+                const existingIndex = chatSessions.findIndex(s => s.id === currentSessionId);
+                if (existingIndex >= 0) {
+                    chatSessions[existingIndex].title = title;
+                    chatSessions[existingIndex].messages = currentMessages;
+                } else {
+                    chatSessions.unshift({ id: currentSessionId, title: title, messages: currentMessages });
+                }
+                localStorage.setItem('ai_health_sessions', JSON.stringify(chatSessions));
+                renderHistoryList();
+            }
+        }
+
+        function renderHistoryList() {
+            historyList.innerHTML = '';
+            chatSessions.forEach(session => {
+                const item = document.createElement('div');
+                item.classList.add('history-item');
+                const titleSpan = document.createElement('span');
+                titleSpan.classList.add('history-item-title');
+                titleSpan.textContent = session.title;
+                titleSpan.title = session.title;
+                const trashBtn = document.createElement('button');
+                trashBtn.classList.add('trash-btn');
+                trashBtn.title = "Delete Chat";
+                trashBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+
+                item.addEventListener('click', () => {
+                    switchView('chat');
+                    loadSession(session.id);
+                });
+                trashBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    promptDeleteSession(session.id);
+                });
+
+                item.appendChild(titleSpan);
+                item.appendChild(trashBtn);
+                historyList.appendChild(item);
+            });
+        }
+
+        function loadSession(id) {
+            saveCurrentSession();
+            const session = chatSessions.find(s => s.id === id);
+            if (session) {
+                currentSessionId = session.id;
+                currentMessages = [...session.messages];
+                chatDisplay.innerHTML = '';
+                currentMessages.forEach(msg => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.classList.add('message', msg.sender);
+                    msgDiv.innerHTML = msg.sender === 'ai' ? parseMarkdown(msg.text) : msg.text;
+                    chatDisplay.appendChild(msgDiv);
+                });
+                chatDisplay.scrollTop = chatDisplay.scrollHeight;
+            }
+        }
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender);
+            msgDiv.innerHTML = sender === 'ai' ? parseMarkdown(text) : text;
+            chatDisplay.appendChild(msgDiv);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+            currentMessages.push({ sender: sender, text: text });
+            saveCurrentSession();
+        }
+
+        // --- 6. Delete Session Confirmation Logic ---
+        let sessionToDelete = null;
+        const deleteModal = document.getElementById('delete-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+        function promptDeleteSession(sessionId) {
+            sessionToDelete = sessionId;
+            deleteModal.classList.add('active');
+        }
+        function closeModal() {
+            sessionToDelete = null;
+            deleteModal.classList.remove('active');
+        }
+
+        cancelDeleteBtn.addEventListener('click', closeModal);
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (sessionToDelete) {
+                chatSessions = chatSessions.filter(s => s.id !== sessionToDelete);
+                localStorage.setItem('ai_health_sessions', JSON.stringify(chatSessions));
+                if (currentSessionId === sessionToDelete) {
+                    currentSessionId = null;
+                    currentMessages = [];
+                    chatDisplay.innerHTML = '';
+                }
+                renderHistoryList();
+            }
+            closeModal();
+        });
+
+        // --- 7. Google Gemini API Chat Execution ---
+        chatInput.addEventListener('keypress', async function (e) {
+            if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+                const userText = chatInput.value.trim();
+                chatInput.value = ''; 
+                if (!currentSessionId) currentSessionId = 'session_' + Date.now();
+                appendMessage(userText, 'user');
+                
+                // Show thinking animation bubble
+                showTypingIndicator();
+
+                try {
+                    const apiHistory = currentMessages
+                        .filter(m => m.sender === 'user' || m.sender === 'ai')
+                        .map(m => ({
+                            role: m.sender === 'user' ? 'user' : 'model',
+                            parts: [{ text: m.text }]
+                        }));
+
+                    let sysInstruction = "You are an AI software that helps with healthy living regardless of age. You can read and write structured markdown tables.";
+                    
+                    if (aiPersonality) {
+                        sysInstruction += `\nCRITICAL CONTEXT FOR AI PERSONALITY AND TONE: ${aiPersonality}`;
+                    }
+
+                    if (!isProfileComplete()) {
+                        sysInstruction += "\nCRITICAL INSTRUCTION: The user's health profile (Height, Age, Weight) is currently INCOMPLETE and locked in Settings. IF THE USER ASKS YOU TO CREATE A PLANNER, SCHEDULE, WORKOUT ROUTINE, OR TABLE, YOU MUST POLITELY DECLINE AND MAKE AN EXCUSE explaining that you need them to complete their required profile details in Settings first before you can construct any planners or tables for them.";
+                    } else {
+                        let conditionsText = userConditions ? `, Special Conditions: ${userConditions}` : "";
+                        sysInstruction += `\nUser Profile Context: Height: ${userHeight}, Age: ${userAge}, Weight: ${userWeight}${conditionsText}.`;
+                        
+                        if (userScheduleType) {
+                            let schedTxt = `\nUser Daily Commitment: ${userScheduleType}`;
+                            if (userScheduleStart && userScheduleEnd) schedTxt += ` from ${userScheduleStart} to ${userScheduleEnd}`;
+                            if (userTimezone) schedTxt += ` (${userTimezone})`;
+                            sysInstruction += `${schedTxt}. Take this daily schedule/timezone into account when recommending workout times, routines, or meal timings.`;
+                        }
+
+                        sysInstruction += `\nAlways format schedules or routines using clean Markdown tables so the user can easily import them.`;
+                    }
+
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`;
+                    
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            systemInstruction: { parts: [{ text: sysInstruction }] },
+                            contents: apiHistory
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    // Remove typing indicator right before rendering the real message
+                    removeTypingIndicator();
+                    
+                    if (data.candidates && data.candidates.length > 0) {
+                        const aiText = data.candidates[0].content.parts[0].text;
+                        appendMessage(aiText, 'ai');
+                    } else if (data.error) {
+                        const errLower = (data.error.message || '').toLowerCase();
+                        if (data.error.code === 400 || data.error.code === 401 || data.error.code === 403 || errLower.includes('key')) invalidateApiKey(data.error.message);
+                        else appendMessage(`API Error: ${data.error.message}`, "system");
+                    } else {
+                        appendMessage("Error: Received unexpected response from AI.", "system");
+                    }
+                } catch (error) {
+                    removeTypingIndicator(); // Ensure indicator vanishes on fetch errors
+                    console.error("Gemini API Error:", error);
+                    appendMessage("Connection error. Please check your internet connection.", "system");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
