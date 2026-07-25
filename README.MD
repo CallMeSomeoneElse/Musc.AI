@@ -1,3 +1,3 @@
-# Project: Musc.AI 
+# Project: HealthCL
 
-Musc AI is a project, in a goal to make a media for AI to make __Healthy Lifestyle__
+HealthCL is a project, in a goal to make a media for AI to make __Healthy Lifestyle__
