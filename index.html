@@ -172,6 +172,7 @@
 
         /* History Item */
         .history-item {
+            position: relative;
             background-color: var(--bg-card);
             border: 1px solid var(--border-light);
             padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
@@ -183,23 +184,29 @@
             align-items: center;
             justify-content: space-between;
             transition: all 0.2s;
+            padding-right: calc(42px * var(--ui-scale));
         }
-
+ 
         .history-item:hover {
             background-color: var(--bg-hover);
             color: var(--text-main);
             border-color: var(--border-focus);
         }
-
+ 
         .history-item-title {
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
             flex-grow: 1;
         }
-
+ 
         .trash-btn {
+            position: absolute;
+            right: calc(10px * var(--ui-scale));
+            top: 50%;
+            transform: translateY(-50%);
             opacity: 0;
+            pointer-events: none;
             background: transparent;
             border: none;
             color: var(--text-dim);
@@ -209,16 +216,36 @@
             align-items: center;
             justify-content: center;
             transition: color 0.2s, opacity 0.2s;
-            margin-left: calc(8px * var(--ui-scale));
-            flex-shrink: 0;
         }
-
-        .history-item:hover .trash-btn {
+ 
+        .history-item:hover .trash-btn,
+        .history-item:focus-within .trash-btn {
             opacity: 1;
+            pointer-events: auto;
         }
-
+ 
         .trash-btn:hover {
             color: var(--accent);
+        }
+ 
+        @media (max-width: 720px) {
+            .dashboard-container {
+                width: 50vw;
+            }
+ 
+            .main-container.shifted {
+                margin-left: 0;
+                width: 100vw;
+            }
+ 
+            .history-item {
+                padding-right: calc(48px * var(--ui-scale));
+            }
+ 
+            .history-item .trash-btn {
+                opacity: 1;
+                pointer-events: auto;
+            }
         }
 
         .trash-btn svg {
