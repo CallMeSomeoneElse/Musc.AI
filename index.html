@@ -170,12 +170,22 @@
             display: flex;
         }
 
+        #archived-history-list {
+            margin-top: calc(6px * var(--ui-scale));
+            max-height: 24vh;
+        }
+
+        #archived-history-toggle-btn {
+            margin-top: calc(10px * var(--ui-scale));
+        }
+
         /* History Item */
         .history-item {
+            position: relative;
             background-color: var(--bg-card);
             border: 1px solid var(--border-light);
             padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
-            border-radius: calc(4px * var(--ui-scale));
+            border-radius: calc(6px * var(--ui-scale));
             font-size: calc((var(--base-font-size) - 2px) * var(--ui-scale));
             color: var(--text-muted);
             cursor: pointer;
@@ -183,9 +193,13 @@
             align-items: center;
             justify-content: space-between;
             transition: all 0.2s;
+            padding-right: calc(48px * var(--ui-scale));
+            min-height: calc(46px * var(--ui-scale));
+            overflow: visible;
         }
 
-        .history-item:hover {
+        .history-item:hover,
+        .history-item:focus-within {
             background-color: var(--bg-hover);
             color: var(--text-main);
             border-color: var(--border-focus);
@@ -196,34 +210,115 @@
             white-space: nowrap;
             overflow: hidden;
             flex-grow: 1;
+            padding-right: 8px;
         }
 
-        .trash-btn {
-            opacity: 0;
+        .history-actions {
+            position: absolute;
+            right: calc(6px * var(--ui-scale));
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .history-menu-btn {
             background: transparent;
             border: none;
             color: var(--text-dim);
             cursor: pointer;
-            padding: 2px 4px;
-            display: flex;
+            width: calc(28px * var(--ui-scale));
+            height: calc(28px * var(--ui-scale));
+            border-radius: 50%;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: color 0.2s, opacity 0.2s;
-            margin-left: calc(8px * var(--ui-scale));
+            transition: background-color 0.2s, color 0.2s;
             flex-shrink: 0;
         }
 
-        .history-item:hover .trash-btn {
-            opacity: 1;
+        .history-menu-btn:hover,
+        .history-menu-btn:focus-visible {
+            background-color: var(--bg-hover);
+            color: var(--text-main);
+            outline: none;
         }
 
-        .trash-btn:hover {
+        .history-menu-btn .dots {
+            display: flex;
+            flex-direction: column;
+            gap: calc(2px * var(--ui-scale));
+        }
+
+        .history-menu-btn .dots span {
+            width: calc(4px * var(--ui-scale));
+            height: calc(4px * var(--ui-scale));
+            border-radius: 50%;
+            background-color: currentColor;
+            display: block;
+        }
+
+        .history-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            min-width: 140px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-main);
+            border-radius: calc(6px * var(--ui-scale));
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 10001;
+        }
+
+        .history-menu.active {
+            display: flex;
+        }
+
+        .history-menu-item {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            text-align: left;
+            padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+            font-size: calc((var(--base-font-size) - 1px) * var(--ui-scale));
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .history-menu-item:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .history-menu-item.delete {
             color: var(--accent);
         }
 
-        .trash-btn svg {
-            width: calc(15px * var(--ui-scale));
-            height: calc(15px * var(--ui-scale));
+        .history-menu-item:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .history-menu-item:disabled:hover {
+            background-color: transparent;
+        }
+
+        @media (max-width: 640px) {
+            .history-item {
+                padding-right: calc(54px * var(--ui-scale));
+            }
+
+            .history-menu-btn {
+                width: calc(32px * var(--ui-scale));
+                height: calc(32px * var(--ui-scale));
+            }
+
+            .history-menu {
+                min-width: 150px;
+            }
         }
 
         .dashboard-spacer {
@@ -799,9 +894,15 @@
                 <span>Chat History</span>
                 <span id="dropdown-arrow" style="font-size: 10px; opacity: 0.7;">▼</span>
             </button>
-            
+             
             <div class="history-list" id="history-list"></div>
-            
+
+            <button class="dash-btn" id="archived-history-toggle-btn" style="justify-content: space-between; margin-top: 8px;">
+                <span>Archived Chats</span>
+                <span id="archived-history-arrow" style="font-size: 10px; opacity: 0.7;">▼</span>
+            </button>
+            <div class="history-list" id="archived-history-list"></div>
+             
             <button class="dash-btn" id="planner-btn" style="justify-content: center;">Planner</button>
         </div>
         
@@ -1499,8 +1600,13 @@
 
         // --- 5. Chat & History State ---
         let chatSessions = JSON.parse(localStorage.getItem('ai_health_sessions')) || [];
+        chatSessions = chatSessions.map(session => ({ ...session, archived: Boolean(session.archived) }));
         let currentSessionId = null;
         let currentMessages = [];
+
+        const archivedHistoryToggleBtn = document.getElementById('archived-history-toggle-btn');
+        const archivedHistoryList = document.getElementById('archived-history-list');
+        const archivedHistoryArrow = document.getElementById('archived-history-arrow');
 
         renderHistoryList();
 
@@ -1511,6 +1617,10 @@
             currentMessages = [];
             chatDisplay.innerHTML = ''; 
         });
+
+        function saveSessions() {
+            localStorage.setItem('ai_health_sessions', JSON.stringify(chatSessions));
+        }
 
         function saveCurrentSession() {
             if (currentMessages.length > 0 && currentSessionId) {
@@ -1523,41 +1633,151 @@
                     chatSessions[existingIndex].title = title;
                     chatSessions[existingIndex].messages = currentMessages;
                 } else {
-                    chatSessions.unshift({ id: currentSessionId, title: title, messages: currentMessages });
+                    chatSessions.unshift({ id: currentSessionId, title: title, messages: currentMessages, archived: false });
                 }
-                localStorage.setItem('ai_health_sessions', JSON.stringify(chatSessions));
+                saveSessions();
+                renderHistoryList();
+            }
+        }
+
+        function closeHistoryMenus() {
+            document.querySelectorAll('.history-menu.active').forEach(menu => menu.classList.remove('active'));
+        }
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.history-actions')) {
+                closeHistoryMenus();
+            }
+        });
+
+        function updateSessionArchiveState(sessionId, archived) {
+            const session = chatSessions.find(s => s.id === sessionId);
+            if (session) {
+                session.archived = archived;
+                saveSessions();
                 renderHistoryList();
             }
         }
 
         function renderHistoryList() {
             historyList.innerHTML = '';
-            chatSessions.forEach(session => {
+            archivedHistoryList.innerHTML = '';
+
+            const activeSessions = chatSessions.filter(session => !session.archived);
+            const archivedSessions = chatSessions.filter(session => session.archived);
+
+            const createSessionItem = (session, listElement, mode) => {
                 const item = document.createElement('div');
                 item.classList.add('history-item');
+                item.tabIndex = 0;
+
                 const titleSpan = document.createElement('span');
                 titleSpan.classList.add('history-item-title');
                 titleSpan.textContent = session.title;
                 titleSpan.title = session.title;
-                const trashBtn = document.createElement('button');
-                trashBtn.classList.add('trash-btn');
-                trashBtn.title = "Delete Chat";
-                trashBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
 
-                item.addEventListener('click', () => {
-                    switchView('chat');
-                    loadSession(session.id);
-                });
-                trashBtn.addEventListener('click', (e) => {
+                const actions = document.createElement('div');
+                actions.classList.add('history-actions');
+
+                const menuBtn = document.createElement('button');
+                menuBtn.classList.add('history-menu-btn');
+                menuBtn.type = 'button';
+                menuBtn.setAttribute('aria-label', `Open chat options for ${session.title}`);
+                menuBtn.innerHTML = '<span class="dots"><span></span><span></span><span></span></span>';
+
+                const menu = document.createElement('div');
+                menu.classList.add('history-menu');
+
+                const archiveItem = document.createElement('button');
+                archiveItem.classList.add('history-menu-item');
+                archiveItem.type = 'button';
+                archiveItem.textContent = mode === 'archived' ? 'Restore' : 'Archive';
+                archiveItem.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    closeHistoryMenus();
+                    updateSessionArchiveState(session.id, mode !== 'archived');
+                });
+
+                const deleteItem = document.createElement('button');
+                deleteItem.classList.add('history-menu-item', 'delete');
+                deleteItem.type = 'button';
+                deleteItem.textContent = 'Delete';
+                deleteItem.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeHistoryMenus();
                     promptDeleteSession(session.id);
                 });
 
+                const moreItem = document.createElement('button');
+                moreItem.classList.add('history-menu-item');
+                moreItem.type = 'button';
+                moreItem.textContent = 'More soon';
+                moreItem.disabled = true;
+
+                menu.appendChild(archiveItem);
+                menu.appendChild(deleteItem);
+                menu.appendChild(moreItem);
+                actions.appendChild(menuBtn);
+                actions.appendChild(menu);
+
+                item.addEventListener('click', () => {
+                    closeHistoryMenus();
+                    switchView('chat');
+                    loadSession(session.id);
+                });
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        closeHistoryMenus();
+                        switchView('chat');
+                        loadSession(session.id);
+                    }
+                });
+                menuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = menu.classList.contains('active');
+                    closeHistoryMenus();
+                    if (!isOpen) {
+                        menu.classList.add('active');
+                    }
+                });
+
                 item.appendChild(titleSpan);
-                item.appendChild(trashBtn);
-                historyList.appendChild(item);
-            });
+                item.appendChild(actions);
+                listElement.appendChild(item);
+            };
+
+            activeSessions.forEach(session => createSessionItem(session, historyList, 'active'));
+            archivedSessions.forEach(session => createSessionItem(session, archivedHistoryList, 'archived'));
+
+            if (activeSessions.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.classList.add('history-item');
+                emptyState.style.opacity = '0.7';
+                emptyState.style.justifyContent = 'center';
+                emptyState.textContent = 'No recent chats';
+                historyList.appendChild(emptyState);
+            }
+
+            if (archivedSessions.length > 0) {
+                archivedHistoryToggleBtn.style.display = 'flex';
+            } else {
+                archivedHistoryToggleBtn.style.display = 'none';
+                archivedHistoryList.classList.remove('open');
+                archivedHistoryArrow.textContent = '▼';
+            }
+
+            if (archivedHistoryList.classList.contains('open') && archivedSessions.length === 0) {
+                archivedHistoryList.classList.remove('open');
+            }
         }
+
+        archivedHistoryToggleBtn.addEventListener('click', () => {
+            if (archivedHistoryToggleBtn.style.display === 'none') return;
+            const isOpen = archivedHistoryList.classList.contains('open');
+            archivedHistoryList.classList.toggle('open', !isOpen);
+            archivedHistoryArrow.textContent = isOpen ? '▼' : '▲';
+        });
 
         function loadSession(id) {
             saveCurrentSession();
