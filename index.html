@@ -937,7 +937,7 @@
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
                 <div class="planner-title">Planner Locked</div>
-                <div class="planner-desc">Please complete your necessary profile info under <strong>"Get Started on Musc.AI"</strong> in Settings (Height, Age, and Weight are required) to unlock your custom AI routine planner. Any unimported or pending tables are discarded while locked.</div>
+                <div class="planner-desc">Please complete your necessary profile info under <strong>"Customize AI"</strong> in Settings (Height, Age, and Weight are required) to unlock your custom AI routine planner. Any unimported or pending tables are discarded while locked.</div>
                 <button class="action-btn" id="go-to-settings-btn">Go to Settings</button>
             </div>
 
@@ -1575,6 +1575,11 @@
                 - Age: ${userAge}
                 - Weight: ${userWeight}`;
                 if (userConditions) promptText += `\n- Special Conditions: ${userConditions}`;
+                if (userEquipment) {
+                    promptText += `\n- Equipment / Resources: ${userEquipment}`;
+                } else {
+                    promptText += `\n- Equipment / Resources: none listed. Reassure the user that they can still follow a bodyweight-only plan and build the schedule around that.`;
+                }
                 
                 if (userScheduleType) {
                     let schedTxt = `\n- Daily Commitment: ${userScheduleType}`;
@@ -1890,7 +1895,8 @@
                         sysInstruction += "\nCRITICAL INSTRUCTION: The user's health profile (Height, Age, Weight) is currently INCOMPLETE and locked in Settings. IF THE USER ASKS YOU TO CREATE A PLANNER, SCHEDULE, WORKOUT ROUTINE, OR TABLE, YOU MUST POLITELY DECLINE AND MAKE AN EXCUSE explaining that you need them to complete their required profile details in Settings first before you can construct any planners or tables for them.";
                     } else {
                         let conditionsText = userConditions ? `, Special Conditions: ${userConditions}` : "";
-                        sysInstruction += `\nUser Profile Context: Height: ${userHeight}, Age: ${userAge}, Weight: ${userWeight}${conditionsText}.`;
+                        let equipmentText = userEquipment ? `, Equipment / Resources: ${userEquipment}` : ", Equipment / Resources: none listed. Reassure the user that they can still follow a bodyweight-only plan and build around that.";
+                        sysInstruction += `\nUser Profile Context: Height: ${userHeight}, Age: ${userAge}, Weight: ${userWeight}${conditionsText}${equipmentText}.`;
                         
                         if (userScheduleType) {
                             let schedTxt = `\nUser Daily Commitment: ${userScheduleType}`;
