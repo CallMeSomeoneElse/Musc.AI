@@ -789,6 +789,11 @@
             border-color: var(--border-focus);
         }
 
+        .settings-input::placeholder {
+            color: var(--text-dim);
+            opacity: 0.8;
+        }
+
         textarea.settings-input {
             resize: vertical;
             min-height: 80px;
@@ -978,37 +983,37 @@
                 </div>
             </div>
 
-            <!-- Section 2: Get Started on Musc.AI -->
+            <!-- Section 2: Customize AI -->
             <div class="settings-card">
-                <div class="settings-card-title">Get Started on Musc.AI</div>
-                <div class="settings-card-subtitle">Provide your health details. Height, Age, and Weight are required to unlock the Planner.</div>
+                <div class="settings-card-title">Customize AI</div>
+                <div class="settings-card-subtitle">Tune the planner and chat experience with your profile, schedule, and available equipment.</div>
                 
-                <div class="grid-2col">
-                    <div class="settings-group">
-                        <label class="settings-label required" for="user-height">Height (cm/in):</label>
-                        <input type="text" id="user-height" class="settings-input" placeholder="e.g. 175 cm">
+                <div class="settings-group" style="margin-bottom: 20px;">
+                    <div style="font-size: calc((var(--base-font-size) - 1px) * var(--ui-scale)); color: var(--text-main); font-weight: 600; margin-bottom: 10px;">Essential Info</div>
+                    <div class="grid-2col">
+                        <div class="settings-group">
+                            <label class="settings-label required" for="user-height">Height (cm/in):</label>
+                            <input type="text" id="user-height" class="settings-input" placeholder="e.g. 175 cm">
+                        </div>
+                        <div class="settings-group">
+                            <label class="settings-label required" for="user-age">Age:</label>
+                            <input type="number" id="user-age" class="settings-input" placeholder="e.g. 25">
+                        </div>
+                        <div class="settings-group">
+                            <label class="settings-label required" for="user-weight">Weight (kg/lbs):</label>
+                            <input type="text" id="user-weight" class="settings-input" placeholder="e.g. 70 kg">
+                        </div>
                     </div>
-                    <div class="settings-group">
-                        <label class="settings-label required" for="user-age">Age:</label>
-                        <input type="number" id="user-age" class="settings-input" placeholder="e.g. 25">
-                    </div>
-                    <div class="settings-group">
-                        <label class="settings-label required" for="user-weight">Weight (kg/lbs):</label>
-                        <input type="text" id="user-weight" class="settings-input" placeholder="e.g. 70 kg">
-                    </div>
-                    <div class="settings-group">
-                        <label class="settings-label" for="user-conditions">Special Conditions (Optional):</label>
-                        <input type="text" id="user-conditions" class="settings-input" placeholder="Injuries, asthma, allergies, etc.">
-                    </div>
+                </div>
 
-                    <!-- NEW: Other Schedule Context -->
-                    <div class="settings-group" style="grid-column: 1 / -1; margin-top: 10px;">
+                <div class="settings-group" style="margin-bottom: 20px;">
+                    <div style="font-size: calc((var(--base-font-size) - 1px) * var(--ui-scale)); color: var(--text-main); font-weight: 600; margin-bottom: 10px;">Schedule</div>
+                    <div class="settings-group">
                         <label class="settings-label" for="user-schedule-type">Other Daily Commitments (Optional):</label>
                         <input type="text" id="user-schedule-type" class="settings-input" placeholder="e.g. School, Office Work, Night Shift">
                         <small style="color: var(--text-dim); margin-top: 2px;">Helps the AI schedule your workouts and meals around your real life.</small>
                     </div>
                     
-                    <!-- Hidden Time Dropdown Menu for Extra Context -->
                     <div class="grid-2col" id="schedule-details-container" style="display: none; grid-column: 1 / -1; padding: 15px; background-color: var(--bg-nav); border-radius: 8px; border-left: 3px solid var(--accent);">
                         <div class="settings-group" style="margin-bottom: 0;">
                             <label class="settings-label" for="user-schedule-start">Start Time:</label>
@@ -1022,6 +1027,21 @@
                             <label class="settings-label" for="user-timezone">Time Zone:</label>
                             <input type="text" id="user-timezone" class="settings-input" placeholder="e.g. UTC-5, EST, Asia/Jakarta">
                             <small style="color: var(--text-dim); margin-top: 4px;">Helps the AI calculate timings properly according to your region.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <div style="font-size: calc((var(--base-font-size) - 1px) * var(--ui-scale)); color: var(--text-main); font-weight: 600; margin-bottom: 10px;">Optionals</div>
+                    <div class="grid-2col">
+                        <div class="settings-group">
+                            <label class="settings-label" for="user-conditions">Special Conditions (Optional):</label>
+                            <input type="text" id="user-conditions" class="settings-input" placeholder="Injuries, asthma, allergies, etc.">
+                        </div>
+                        <div class="settings-group">
+                            <label class="settings-label" for="user-equipment">Equipment (Optional):</label>
+                            <input type="text" id="user-equipment" class="settings-input" placeholder="Gym counts as equipment">
+                            <small style="color: var(--text-dim); margin-top: 2px;">Optional extra context for the AI. If left blank, it will assume you have no equipment and build around bodyweight.</small>
                         </div>
                     </div>
                 </div>
@@ -1085,6 +1105,7 @@
         let userAge = localStorage.getItem('ai_health_age') || '';
         let userWeight = localStorage.getItem('ai_health_weight') || '';
         let userConditions = localStorage.getItem('ai_health_conditions') || '';
+        let userEquipment = localStorage.getItem('ai_health_equipment') || '';
         
         // New Schedule State Variables
         let userScheduleType = localStorage.getItem('ai_health_schedule_type') || '';
@@ -1115,6 +1136,7 @@
         if (userAge) document.getElementById('user-age').value = userAge;
         if (userWeight) document.getElementById('user-weight').value = userWeight;
         if (userConditions) document.getElementById('user-conditions').value = userConditions;
+        if (userEquipment) document.getElementById('user-equipment').value = userEquipment;
         
         // Hydrate new schedule inputs
         const scheduleTypeInput = document.getElementById('user-schedule-type');
@@ -1359,6 +1381,7 @@
             userAge = document.getElementById('user-age').value.trim();
             userWeight = document.getElementById('user-weight').value.trim();
             userConditions = document.getElementById('user-conditions').value.trim();
+            userEquipment = document.getElementById('user-equipment').value.trim();
             
             // Schedule Info
             userScheduleType = document.getElementById('user-schedule-type').value.trim();
@@ -1370,6 +1393,8 @@
             localStorage.setItem('ai_health_age', userAge);
             localStorage.setItem('ai_health_weight', userWeight);
             localStorage.setItem('ai_health_conditions', userConditions);
+            if (userEquipment) localStorage.setItem('ai_health_equipment', userEquipment);
+            else localStorage.removeItem('ai_health_equipment');
             
             localStorage.setItem('ai_health_schedule_type', userScheduleType);
             localStorage.setItem('ai_health_schedule_start', userScheduleStart);
