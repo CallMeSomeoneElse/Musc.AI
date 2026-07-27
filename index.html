@@ -897,14 +897,14 @@
             
             <button class="dash-btn" id="history-toggle-btn">
                 <span>Chat History</span>
-                <span id="dropdown-arrow" style="font-size: 10px; opacity: 0.7;">▼</span>
+                <span id="dropdown-arrow" style="font-size: 10px; opacity: 0.7;"> </span>
             </button>
              
             <div class="history-list" id="history-list"></div>
 
             <button class="dash-btn" id="archived-history-toggle-btn" style="justify-content: space-between; margin-top: 8px;">
                 <span>Archived Chats</span>
-                <span id="archived-history-arrow" style="font-size: 10px; opacity: 0.7;">▼</span>
+                <span id="archived-history-arrow" style="font-size: 10px; opacity: 0.7;"> </span>
             </button>
             <div class="history-list" id="archived-history-list"></div>
              
@@ -1362,7 +1362,7 @@
 
         historyToggleBtn.addEventListener('click', () => {
             historyList.classList.toggle('open');
-            dropdownArrow.textContent = historyList.classList.contains('open') ? '▲' : '▼';
+            dropdownArrow.textContent = historyList.classList.contains('open') ? ' ' : ' ';
         });
 
         // --- 3. Settings Management ---
@@ -1794,7 +1794,7 @@
             } else {
                 archivedHistoryToggleBtn.style.display = 'none';
                 archivedHistoryList.classList.remove('open');
-                archivedHistoryArrow.textContent = '▼';
+                archivedHistoryArrow.textContent = ' ';
             }
 
             if (archivedHistoryList.classList.contains('open') && archivedSessions.length === 0) {
@@ -1806,7 +1806,7 @@
             if (archivedHistoryToggleBtn.style.display === 'none') return;
             const isOpen = archivedHistoryList.classList.contains('open');
             archivedHistoryList.classList.toggle('open', !isOpen);
-            archivedHistoryArrow.textContent = isOpen ? '▼' : '▲';
+            archivedHistoryArrow.textContent = isOpen ? ' ' : ' ';
         });
 
         function loadSession(id) {
@@ -1885,7 +1885,7 @@
                             parts: [{ text: m.text }]
                         }));
 
-                    let sysInstruction = "You are a highly knowledgeable AI, helping users regardless of age, be as helpful s possible, try to chat with the user and ask the user needs, you are able to read and write in markdown,inquire ideas, you are able to make a planner or table for the user,";
+                    let sysInstruction = "you are an intelligent helper designed to help the user needs, dont agree with every single user term,correct them if they are wrong, you can create tables,schedules and can write and read markdown, dont rush to make a schedule, wait for a certain keyword first.";
                     
                     if (aiPersonality) {
                         sysInstruction += `\nCRITICAL CONTEXT FOR AI PERSONALITY AND TONE: ${aiPersonality}`;
@@ -1921,7 +1921,7 @@
 
                     const data = await response.json();
                     
-                    // Remove typing indicator right before rendering the real message
+                    // waits until the response is done and then the animation thing would dissapear
                     removeTypingIndicator();
                     
                     if (data.candidates && data.candidates.length > 0) {
