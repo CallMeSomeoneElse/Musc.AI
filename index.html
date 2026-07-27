@@ -9,6 +9,10 @@
         :root {
             --ui-scale: 1;
             --base-font-size: 14px;
+            --page-ui-scale: 1;
+            --page-base-font-size: 14px;
+            --dashboard-width: 30vw;
+            --dashboard-main-offset: 30vw;
             
             /* Dark Theme (Default) */
             --bg-main: #000000;
@@ -34,6 +38,41 @@
             
             --sys-msg-bg: #2b1d1e;
             --sys-msg-text: #f8d7da;
+        }
+
+        body.screen-ss {
+            --dashboard-width: 50vw;
+            --dashboard-main-offset: 50vw;
+            --page-ui-scale: 0.95;
+            --page-base-font-size: 13px;
+        }
+
+        body.screen-s {
+            --dashboard-width: 50vw;
+            --dashboard-main-offset: 50vw;
+            --page-ui-scale: 1;
+            --page-base-font-size: 14px;
+        }
+
+        body.screen-m {
+            --dashboard-width: 30vw;
+            --dashboard-main-offset: 30vw;
+            --page-ui-scale: 1.05;
+            --page-base-font-size: 15px;
+        }
+
+        body.screen-l {
+            --dashboard-width: 30vw;
+            --dashboard-main-offset: 30vw;
+            --page-ui-scale: 1.15;
+            --page-base-font-size: 16px;
+        }
+
+        body.screen-xl {
+            --dashboard-width: 30vw;
+            --dashboard-main-offset: 30vw;
+            --page-ui-scale: 1.2;
+            --page-base-font-size: 18px;
         }
 
         body.light-mode {
@@ -1096,9 +1135,32 @@
         // --- 0. State Variables & Initialization ---
         let GEMINI_API_KEY = localStorage.getItem('ai_health_gemini_key') || '';
         let aiPersonality = localStorage.getItem('ai_health_personality') || '';
-        
-        let currentScale = localStorage.getItem('ai_health_ui_scale') || '1';
-        let currentFontSize = localStorage.getItem('ai_health_font_size') || '14';
+
+        function applyScreenSizeClass() {
+            const width = window.innerWidth;
+            document.body.classList.remove('screen-ss', 'screen-s', 'screen-m', 'screen-l', 'screen-xl');
+
+            if (width <= 360) {
+                document.body.classList.add('screen-ss');
+            } else if (width <= 640) {
+                document.body.classList.add('screen-s');
+            } else if (width <= 960) {
+                document.body.classList.add('screen-m');
+            } else if (width <= 1280) {
+                document.body.classList.add('screen-l');
+            } else {
+                document.body.classList.add('screen-xl');
+            }
+        }
+
+        applyScreenSizeClass();
+        window.addEventListener('resize', applyScreenSizeClass);
+
+        const defaultScale = getComputedStyle(document.body).getPropertyValue('--page-ui-scale').trim() || '1';
+        const defaultFontSize = getComputedStyle(document.body).getPropertyValue('--page-base-font-size').trim() || '14px';
+
+        let currentScale = localStorage.getItem('ai_health_ui_scale') || defaultScale;
+        let currentFontSize = localStorage.getItem('ai_health_font_size') || defaultFontSize.replace('px', '');
         let currentTheme = localStorage.getItem('ai_health_theme') || 'dark';
         
         let userHeight = localStorage.getItem('ai_health_height') || '';
