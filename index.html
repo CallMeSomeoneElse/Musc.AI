@@ -394,6 +394,14 @@
         }
 
         /* CHAT VIEW */
+        .chat-view-content {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
         .chat-display {
             flex-grow: 1;
             padding: calc(30px * var(--ui-scale));
@@ -401,6 +409,92 @@
             display: flex;
             flex-direction: column;
             gap: calc(20px * var(--ui-scale));
+        }
+
+        .welcome-card {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: calc(28px * var(--ui-scale));
+            padding: calc(30px * var(--ui-scale));
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: calc(16px * var(--ui-scale));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+            text-align: left;
+            color: var(--text-main);
+            z-index: 5;
+        }
+
+        .welcome-card-content {
+            display: flex;
+            flex-direction: column;
+            gap: calc(16px * var(--ui-scale));
+            width: 100%;
+            max-width: 520px;
+        }
+
+        @media (max-width: 600px) {
+            .welcome-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .welcome-card-content {
+                align-items: center;
+            }
+        }
+
+        .welcome-card.hidden {
+            display: none;
+        }
+
+        .welcome-cat-img {
+            width: calc(280px * var(--ui-scale));
+            max-width: 100%;
+            height: auto;
+            border-radius: calc(18px * var(--ui-scale));
+            border: 1px solid var(--border-light);
+            object-fit: cover;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            flex-shrink: 0;
+        }
+
+        .welcome-headline {
+            font-size: calc((var(--base-font-size) + 4px) * var(--ui-scale));
+            font-weight: 700;
+        }
+
+        .welcome-prompt-text {
+            font-size: calc((var(--base-font-size) + 1px) * var(--ui-scale));
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .welcome-input-wrapper {            width: 100%;
+            max-width: 520px;
+        }
+
+        .welcome-input-wrapper .chat-input {
+            width: 100%;
+            padding: calc(18px * var(--ui-scale));
+            border-radius: calc(12px * var(--ui-scale));
+            border: 1px solid var(--border-main);
+            background-color: rgba(255,255,255,0.08);
+            color: var(--text-main);
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s, color 0.3s;
+            font-size: calc((var(--base-font-size) + 1px) * var(--ui-scale));
+        }
+
+        .welcome-input-wrapper .chat-input:focus {
+            border-color: var(--border-focus);
+            background-color: var(--bg-input);
         }
 
         .input-area {
@@ -934,16 +1028,16 @@
         <div class="dashboard-menu">
             <button class="dash-btn" id="new-chat-btn" style="justify-content: center;">New Chat</button>
             
-            <button class="dash-btn" id="history-toggle-btn"Style="justify-content:center;display:flex;align-items:center;">
+            <button class="dash-btn" id="history-toggle-btn" style="justify-content:center;display:flex;align-items:center;">
                 <span>Chat History</span>
-                <span id="dropdown-arrow" style="font-size: 10px; opacity: 0.7;"> </span>
+                <span id="dropdown-arrow" style="font-size: 10px; opacity: 0.7;">▼</span>
             </button>
              
             <div class="history-list" id="history-list"></div>
 
             <button class="dash-btn" id="archived-history-toggle-btn" style="justify-content: space-between; margin-top: 8px;">
                 <span>Archived Chats</span>
-                <span id="archived-history-arrow" style="font-size: 10px; opacity: 0.7;"> </span>
+                <span id="archived-history-arrow" style="font-size: 10px; opacity: 0.7;">▼</span>
             </button>
             <div class="history-list" id="archived-history-list"></div>
              
@@ -960,9 +1054,20 @@
         
         <!-- View 1: Chat Interface -->
         <div class="view-section active" id="chat-view">
-            <div class="chat-display" id="chat-display"></div>
-            <div class="input-area">
-                <input type="text" class="chat-input" id="chat-input">
+            <div class="chat-view-content">
+                <div class="chat-display" id="chat-display"></div>
+                <div class="welcome-card" id="welcome-card">
+                    <!-- Change the src attribute below to update the welcome placeholder image -->
+                    <img class="welcome-cat-img" id="welcome-cat-img" src="https://placekitten.com/320/240" alt="Placeholder cat image">
+                    <div class="welcome-card-content">
+                        <div class="welcome-headline" id="welcome-headline">Welcome to HealthCL</div>
+                        <div class="welcome-prompt-text" id="welcome-prompt-text"></div>
+                        <div class="welcome-input-wrapper" id="welcome-input-wrapper"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area" id="bottom-input-area" style="display: none;">
+                <input type="text" id="chat-input" class="chat-input" placeholder="Type your prompt here and press Enter..." autocomplete="off">
             </div>
         </div>
 
@@ -1078,6 +1183,11 @@
                             <input type="text" id="user-conditions" class="settings-input" placeholder="Injuries, asthma, allergies, etc.">
                         </div>
                         <div class="settings-group">
+                            <label class="settings-label" for="user-preferred-name">Preferred Name (Optional):</label>
+                            <input type="text" id="user-preferred-name" class="settings-input" placeholder="e.g. Alex">
+                            <small style="color: var(--text-dim); margin-top: 2px;">This is the name the AI should use while addressing you.</small>
+                        </div>
+                        <div class="settings-group">
                             <label class="settings-label" for="user-equipment">Equipment (Optional):</label>
                             <input type="text" id="user-equipment" class="settings-input" placeholder="Gym counts as equipment">
                             <small style="color: var(--text-dim); margin-top: 2px;">Optional extra context for the AI. If left blank, it will assume you have no equipment and build around bodyweight.</small>
@@ -1168,6 +1278,7 @@
         let userWeight = localStorage.getItem('ai_health_weight') || '';
         let userConditions = localStorage.getItem('ai_health_conditions') || '';
         let userEquipment = localStorage.getItem('ai_health_equipment') || '';
+        let userPreferredName = localStorage.getItem('ai_health_preferred_name') || '';
         
         // New Schedule State Variables
         let userScheduleType = localStorage.getItem('ai_health_schedule_type') || '';
@@ -1198,6 +1309,7 @@
         if (userAge) document.getElementById('user-age').value = userAge;
         if (userWeight) document.getElementById('user-weight').value = userWeight;
         if (userConditions) document.getElementById('user-conditions').value = userConditions;
+        if (userPreferredName) document.getElementById('user-preferred-name').value = userPreferredName;
         if (userEquipment) document.getElementById('user-equipment').value = userEquipment;
         
         // Hydrate new schedule inputs
@@ -1236,6 +1348,47 @@
 
         const chatInput = document.getElementById('chat-input');
         const chatDisplay = document.getElementById('chat-display');
+        const welcomeCard = document.getElementById('welcome-card');
+        const welcomePromptText = document.getElementById('welcome-prompt-text');
+        const welcomeInputWrapper = document.getElementById('welcome-input-wrapper');
+        const bottomInputArea = document.getElementById('bottom-input-area');
+
+        const welcomePrompts = [
+            "What can i assist you?",
+            "Give me your needs (user)",
+            "How can i help you (user)?",
+            "Hi, Im HealthCL, Ready to assist anytime"
+        ];
+        let lastWelcomePrompt = null;
+
+        function getRandomWelcomePrompt() {
+            const availablePrompts = welcomePrompts.filter(prompt => prompt !== lastWelcomePrompt);
+            const selected = availablePrompts[Math.floor(Math.random() * availablePrompts.length)];
+            lastWelcomePrompt = selected;
+            return selected;
+        }
+
+        function renderWelcomeCard() {
+            const prompt = getRandomWelcomePrompt();
+            welcomePromptText.textContent = prompt;
+        }
+
+        function showWelcomeCard(show) {
+            if (show) {
+                welcomeCard.classList.remove('hidden');
+                bottomInputArea.style.display = 'none';
+                welcomeInputWrapper.appendChild(chatInput);
+                renderWelcomeCard();
+                chatInput.placeholder = "Start by typing your first question...";
+            } else {
+                welcomeCard.classList.add('hidden');
+                bottomInputArea.style.display = 'block';
+                bottomInputArea.appendChild(chatInput);
+                updateInputState();
+            }
+        }
+
+        showWelcomeCard(true);
 
         // Note: Schedule is an optional context, so it doesn't block completion
         function isProfileComplete() {
@@ -1424,7 +1577,7 @@
 
         historyToggleBtn.addEventListener('click', () => {
             historyList.classList.toggle('open');
-            dropdownArrow.textContent = historyList.classList.contains('open') ? ' ' : ' ';
+            dropdownArrow.textContent = historyList.classList.contains('open') ? '▲' : '▼';
         });
 
         // --- 3. Settings Management ---
@@ -1443,6 +1596,7 @@
             userAge = document.getElementById('user-age').value.trim();
             userWeight = document.getElementById('user-weight').value.trim();
             userConditions = document.getElementById('user-conditions').value.trim();
+            userPreferredName = document.getElementById('user-preferred-name').value.trim();
             userEquipment = document.getElementById('user-equipment').value.trim();
             
             // Schedule Info
@@ -1455,6 +1609,8 @@
             localStorage.setItem('ai_health_age', userAge);
             localStorage.setItem('ai_health_weight', userWeight);
             localStorage.setItem('ai_health_conditions', userConditions);
+            if (userPreferredName) localStorage.setItem('ai_health_preferred_name', userPreferredName);
+            else localStorage.removeItem('ai_health_preferred_name');
             if (userEquipment) localStorage.setItem('ai_health_equipment', userEquipment);
             else localStorage.removeItem('ai_health_equipment');
             
@@ -1637,6 +1793,9 @@
                 - Age: ${userAge}
                 - Weight: ${userWeight}`;
                 if (userConditions) promptText += `\n- Special Conditions: ${userConditions}`;
+                if (userPreferredName) {
+                    promptText += `\n- Preferred name: ${userPreferredName}`;
+                }
                 if (userEquipment) {
                     promptText += `\n- Equipment / Resources: ${userEquipment}`;
                 } else {
@@ -1707,7 +1866,8 @@
             saveCurrentSession();
             currentSessionId = 'session_' + Date.now();
             currentMessages = [];
-            chatDisplay.innerHTML = ''; 
+            chatDisplay.innerHTML = '';
+            showWelcomeCard(true);
         });
 
         function saveSessions() {
@@ -1856,7 +2016,7 @@
             } else {
                 archivedHistoryToggleBtn.style.display = 'none';
                 archivedHistoryList.classList.remove('open');
-                archivedHistoryArrow.textContent = ' ';
+                archivedHistoryArrow.textContent = '▼';
             }
 
             if (archivedHistoryList.classList.contains('open') && archivedSessions.length === 0) {
@@ -1868,7 +2028,7 @@
             if (archivedHistoryToggleBtn.style.display === 'none') return;
             const isOpen = archivedHistoryList.classList.contains('open');
             archivedHistoryList.classList.toggle('open', !isOpen);
-            archivedHistoryArrow.textContent = isOpen ? ' ' : ' ';
+            archivedHistoryArrow.textContent = isOpen ? '▲' : '▼';
         });
 
         function loadSession(id) {
@@ -1885,6 +2045,7 @@
                     chatDisplay.appendChild(msgDiv);
                 });
                 chatDisplay.scrollTop = chatDisplay.scrollHeight;
+                showWelcomeCard(currentMessages.length === 0);
             }
         }
 
@@ -1931,11 +2092,14 @@
         // --- 7. Google Gemini API Chat Execution ---
         chatInput.addEventListener('keypress', async function (e) {
             if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+                if (!currentSessionId) currentSessionId = 'session_' + Date.now();
+                if (welcomeCard && !welcomeCard.classList.contains('hidden')) {
+                    showWelcomeCard(false);
+                }
                 const userText = chatInput.value.trim();
                 chatInput.value = ''; 
-                if (!currentSessionId) currentSessionId = 'session_' + Date.now();
                 appendMessage(userText, 'user');
-                
+                    
                 // Show thinking animation bubble
                 showTypingIndicator();
 
@@ -1947,7 +2111,7 @@
                             parts: [{ text: m.text }]
                         }));
 
-                    let sysInstruction = "you are an intelligent helper designed to help the user needs, dont agree with every single user term,correct them if they are wrong, you can create tables,schedules and can write and read markdown, dont rush to make a schedule, wait for a certain keyword first.";
+                    let sysInstruction = "You are an AI designed to assist the user with their healthy lifestyle goals,INQUIRE IDEAS, you can make planners,write and read in markdown, the user dont always came for exercise routines, dont always offer the user for a planner, wait for certain keywords before making planners";
                     
                     if (aiPersonality) {
                         sysInstruction += `\nCRITICAL CONTEXT FOR AI PERSONALITY AND TONE: ${aiPersonality}`;
@@ -1957,8 +2121,12 @@
                         sysInstruction += "\nCRITICAL INSTRUCTION: The user's health profile (Height, Age, Weight) is currently INCOMPLETE and locked in Settings. IF THE USER ASKS YOU TO CREATE A PLANNER, SCHEDULE, WORKOUT ROUTINE, OR TABLE, YOU MUST POLITELY DECLINE AND MAKE AN EXCUSE explaining that you need them to complete their required profile details in Settings first before you can construct any planners or tables for them.";
                     } else {
                         let conditionsText = userConditions ? `, Special Conditions: ${userConditions}` : "";
+                        let nameText = userPreferredName ? `, Preferred Name: ${userPreferredName}` : "";
                         let equipmentText = userEquipment ? `, Equipment / Resources: ${userEquipment}` : ", Equipment / Resources: none listed. Reassure the user that they can still follow a bodyweight-only plan and build around that.";
-                        sysInstruction += `\nUser Profile Context: Height: ${userHeight}, Age: ${userAge}, Weight: ${userWeight}${conditionsText}${equipmentText}.`;
+                        sysInstruction += `\nUser Profile Context: Height: ${userHeight}, Age: ${userAge}, Weight: ${userWeight}${conditionsText}${nameText}${equipmentText}.`;
+                        if (userPreferredName) {
+                            sysInstruction += `\nWhen talking to the user, address them by their preferred name: ${userPreferredName}.`;
+                        }
                         
                         if (userScheduleType) {
                             let schedTxt = `\nUser Daily Commitment: ${userScheduleType}`;
