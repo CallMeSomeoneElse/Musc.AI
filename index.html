@@ -1062,14 +1062,14 @@
             
             <button class="dash-btn" id="history-toggle-btn" style="justify-content:center;display:flex;align-items:center;">
                 <span>Chat History</span>
-                <span id="dropdown-arrow" style="font-size: 10px; opacity: 0.7;">▼</span>
+                <span id="dropdown-arrow" style="font-size: 10px; opacity: 0.7;"> </span>
             </button>
              
             <div class="history-list" id="history-list"></div>
 
-            <button class="dash-btn" id="archived-history-toggle-btn" style="justify-content: space-between; margin-top: 8px;">
+            <button class="dash-btn" id="archived-history-toggle-btn" style="justify-content: center; margin-top: 8px;text-align:center;">
                 <span>Archived Chats</span>
-                <span id="archived-history-arrow" style="font-size: 10px; opacity: 0.7;">▼</span>
+                <span id="archived-history-arrow" style="font-size: 10px; opacity: 0.7;"> </span>
             </button>
             <div class="history-list" id="archived-history-list"></div>
              
@@ -1609,7 +1609,7 @@
 
         historyToggleBtn.addEventListener('click', () => {
             historyList.classList.toggle('open');
-            dropdownArrow.textContent = historyList.classList.contains('open') ? '▲' : '▼';
+            dropdownArrow.textContent = historyList.classList.contains('open') ? ' ' : ' ';
         });
 
         // --- 3. Settings Management ---
@@ -2048,7 +2048,7 @@
             } else {
                 archivedHistoryToggleBtn.style.display = 'none';
                 archivedHistoryList.classList.remove('open');
-                archivedHistoryArrow.textContent = '▼';
+                archivedHistoryArrow.textContent = ' ';
             }
 
             if (archivedHistoryList.classList.contains('open') && archivedSessions.length === 0) {
@@ -2060,7 +2060,7 @@
             if (archivedHistoryToggleBtn.style.display === 'none') return;
             const isOpen = archivedHistoryList.classList.contains('open');
             archivedHistoryList.classList.toggle('open', !isOpen);
-            archivedHistoryArrow.textContent = isOpen ? '▲' : '▼';
+            archivedHistoryArrow.textContent = isOpen ? ' ' : ' ';
         });
 
         function loadSession(id) {
